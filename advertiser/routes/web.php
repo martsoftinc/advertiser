@@ -4,8 +4,15 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\advertiserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\VerifyCampaign;
+
+
+
+
+
 
 Route::get('/', [advertiserController::class, 'index']);  
+Route::get('/logout', [advertiserController::class, 'logout'])->name('logout');  
 Route::get('/login', [advertiserController::class, 'login'])->name('login');  
 Route::get('/register', [advertiserController::class, 'register']);
 Route::post('/login', [advertiserController::class, 'loginrequest'])->name('userlogin');  
@@ -17,6 +24,9 @@ Route::get('/dashboard', [advertiserController::class, 'advertiserDashboard'])->
 Route::get('/billing', [advertiserController::class, 'Transaction']);
 Route::get('/analytics', [advertiserController::class, 'Analytics']);
 Route::get('/userdata', [advertiserController::class, 'userdata']);
+
+
+Route::post('/verify-campaign', [VerifyCampaign::class, 'verifyCode'])->name('verify.campaign');
 // Email Routes
 Route::get('/email-campaigns', [advertiserController::class, 'EmailCampagnShow']);
 Route::post('/email-campaigns', [advertiserController::class, 'SendCampaignEmails'])->name('SendEmails');

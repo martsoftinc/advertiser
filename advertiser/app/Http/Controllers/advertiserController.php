@@ -15,6 +15,29 @@ class advertiserController extends Controller
 {
     //
 
+    public function logout(Request $request)
+{
+    // Get current user before logout
+    $user = Auth::user();
+    
+    // Logout the user
+    Auth::logout();
+    
+    // Invalidate the session
+    $request->session()->invalidate();
+    
+    // Regenerate CSRF token
+    $request->session()->regenerateToken();
+    
+   
+    return redirect()->route('login')->with('success', 'You have been logged out successfully.');
+}
+
+
+
+
+
+
     public function index(){
         return view('login');
     }
@@ -74,6 +97,7 @@ class advertiserController extends Controller
     /* start of advertiser registration */
 
     public function registerrequest(Request $request){
+
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users,email',
@@ -534,6 +558,38 @@ class advertiserController extends Controller
     // Redirect to the landing page with referrer as query parameter
     return redirect()->away("{$task->landing_page}?ref=" . urlencode($referrerUrl));
 }
+
+
+// Get users initials
+public function getInitialsAttribute()
+    {
+        $name = trim($this->name);
+        
+        if (empty($name)) {
+            return '??';
+        }
+        
+        $names = explode(' ', $name);
+        
+        // Single name: take first 2 letters
+        if (count($names) === 1) {
+            return strtoupper(substr($name, 0, 2));
+        }
+        
+        // Multiple names: take first letter of first and last name
+        $initials = strtoupper($names[0][0]);
+        
+        // Get last non-empty name
+        for ($i = count($names) - 1; $i > 0; $i--) {
+            if (!empty($names[$i])) {
+                $initials .= strtoupper($names[$i][0]);
+                break;
+            }
+        }
+        
+        return substr($initials, 0, 2);
+    }
+
 
 
    

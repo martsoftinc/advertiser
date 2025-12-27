@@ -4,7 +4,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Corona Admin</title>
+    <title>Readify Advertiser</title>
  
     <!-- plugins:css -->
     <link rel="stylesheet" href="{{ asset('assets_new/vendors/mdi/css/materialdesignicons.min.css') }}">
@@ -44,13 +44,13 @@
           <li class="nav-item profile">
             <div class="profile-desc">
               <div class="profile-pic">
-                <div class="count-indicator">
-                  <img class="img-xs rounded-circle " src="{{ asset('assets_new/images/faces/face15.jpg') }}" alt="">
-                  <span class="count bg-success"></span>
-                </div>
+                <div class="img-xs rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+     style="width: 40px; height: 40px; font-weight: bold;">
+    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}{{ strtoupper(substr(strrchr(' ' . auth()->user()->name, ' '), 1, 1)) }}
+</div>
                 <div class="profile-name">
-                  <h5 class="mb-0 font-weight-normal">Henry Klein</h5>
-                  <span>Gold Member</span>
+                  <h5 class="mb-0 font-weight-normal">{{ Auth::user()->name }}</h5>
+                  <span>ID: {{ Auth::user()->account_id}}</span>
                 </div>
               </div>
               <a href="#" id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
@@ -94,7 +94,7 @@
             <span class="nav-link">Navigation</span>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="/advertiser">
+            <a class="nav-link" href="/dashboard">
               <span class="menu-icon">
                 <i class="mdi mdi-speedometer"></i>
               </span>
@@ -163,7 +163,7 @@
             </a>
           </li>
           <li class="nav-item menu-items">
-            <a class="nav-link" href="pages/icons/mdi.html">
+            <a class="nav-link" href="/logout">
               <span class="menu-icon">
                 <i class="mdi mdi-contacts"></i>
               </span>
