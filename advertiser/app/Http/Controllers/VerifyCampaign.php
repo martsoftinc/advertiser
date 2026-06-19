@@ -13,7 +13,7 @@ class VerifyCampaign extends Controller
 {
     $request->validate([
         'verificationCode' => 'required|string',
-        #'id' => 'required|exists:campaigns,id',
+        'id' => 'required|exists:campaigns,id',
     ]);
     
     $job = campaignModel::find($request->id);
@@ -28,21 +28,20 @@ class VerifyCampaign extends Controller
         $combinedString = $job->final_url . $today . $clientIp;
         $generatedHash = hash('sha256', $combinedString);
         
-        #Log::info('IP: ' . $clientIp);
-        #Log::info('Date: ' . $today);
-        #Log::info('Final URL: ' . $job->final_url);
-        #Log::info('Generated hash: ' . $generatedHash);
-        #Log::info('Received code: ' . $request->verificationCode);
+        Log::info('IP: ' . $clientIp);
+        Log::info('Date: ' . $today);
+        Log::info('Final URL: ' . $job->final_url);
+        Log::info('Generated hash: ' . $generatedHash);
+        Log::info('Received code: ' . $request->verificationCode);
         
-        
+        $campaign = campaignModel::find($request->id);
         if (hash_equals($generatedHash, $request->verificationCode)) {
             Log::info('Hash verification successful');
-            if ($campaign) {
-                    $campaign->status = 'under_review';
+            #if ($campaign->status !== 'approved') {
+                    $campaign->status = 'Active';
                     $campaign->save();
                     
-                    return $campaign;
-            }
+         
             return back()->with('success', 'Verification successful! Campaign has been activated.');
 
         } else {

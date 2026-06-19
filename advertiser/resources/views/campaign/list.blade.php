@@ -4,7 +4,21 @@
         <div class="main-panel">
           <div class="content-wrapper">
             
-           
+           <!-- Display success message -->
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+       
+    </div>
+@endif
+
+<!-- Optional: Error message too -->
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        
+    </div>
+@endif
             <div class="row ">
               <div class="col-12 grid-margin">
                 <div class="card">
@@ -67,7 +81,7 @@
                                     <span class="badge badge-outline-warning" title="Under Review">
                                         <i class="mdi mdi-clock-outline"></i> Pending
                                     </span>                       
-                                @elseif($campaign->status == "approved")
+                                @elseif($campaign->status == "Approved")
                                     <span class="badge badge-outline-success" title="Active">
                                         <i class="mdi mdi-play-circle-outline"></i> Active
                                     </span>
@@ -78,7 +92,7 @@
                                             <i class="mdi mdi-pause"></i>
                                         </button>
                                     </form>
-                                @elseif($campaign->status == "paused")
+                                @elseif($campaign->status == "Paused")
                                     <span class="badge badge-outline-secondary" title="Paused">
                                         <i class="mdi mdi-pause-circle-outline"></i> Paused
                                     </span>
@@ -148,17 +162,30 @@
                     </div>
                     
                     <div class="form-group">
-                      <label for="campaignUrl{{ $campaign->id }}">Campaign Test URL:</label>
-                      <div class="input-group">
-                        <input type="text" class="form-control" id="campaignUrl{{ $campaign->id }}" value="{{ $campaign->final_url }}" readonly>
-                        <div class="input-group-append">
-                          <a href="{{ $campaign->landing_page }}" target="_blank" class="btn btn-outline-primary" id="openLinkBtn{{ $campaign->id }}">
-                            <i class="mdi mdi-open-in-new mr-1"></i> Open Link
-                          </a>
-                        </div>
-                      </div>
-                      <small class="form-text text-muted">Open this link in a new tab to see your campaign and get the verification code.</small>
-                    </div>
+    <label for="campaignUrl{{ $campaign->id }}">Campaign Test URL:</label>
+    <div class="input-group">
+        <input type="text" class="form-control" id="campaignUrl{{ $campaign->id }}" value="{{ $campaign->landing_page }}" readonly>
+        <div class="input-group-append">
+            <button class="btn btn-outline-primary" onclick="openWithoutReferrer('{{ $campaign->landing_page }}')">
+                <i class="mdi mdi-open-in-new mr-1"></i> Open Link
+            </button>
+        </div>
+    </div>
+    <small class="form-text text-muted">Open this link in a new tab to see your campaign and get the verification code.</small>
+</div>
+
+<script>
+function openWithoutReferrer(url) {
+    // Method 1: Using a temporary anchor with noreferrer
+    var link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
                     
                     <div class="form-group">
                       <label for="verificationCode{{ $campaign->id }}">

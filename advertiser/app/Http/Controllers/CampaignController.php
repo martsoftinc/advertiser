@@ -34,10 +34,10 @@ class CampaignController extends Controller
             'final_url' => 'required|url',
             'end_date' => 'required|date',
             'gender' => 'required|in:male,female,other', // Adjust based on your options
-            'referrer' => 'nullable|string',
+           
             'daily_budget' => 'required|numeric|min:0',
             'age_group' => 'required|string', // Adjust as needed
-            'cpc' => 'required|numeric|min:0',
+            
             // Add other fields as needed, excluding user_id, adgroup_id, etc., if they shouldn't be editable
         ]);
 
@@ -53,6 +53,21 @@ class CampaignController extends Controller
             'cpc',
             // Add 'status' if editable here too
         ]));
+
+         $validated = $request->validate([
+        'countries' => 'required|array|min:1',
+        'countries.*' => 'exists:countries,id'
+         ]);   
+        $countryData = [];
+        foreach ($validated['countries'] as $countryId) {
+            $countryData[] = [
+                'campaign_id' => $campaign->id,
+                'country_id' => $countryId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        DB::table('campaign_country')->insert($countryData);
 
         return redirect()->back()->with('success', 'Campaign updated successfully.');
     }

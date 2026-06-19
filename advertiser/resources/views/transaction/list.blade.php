@@ -9,7 +9,7 @@
               <div class="col-12 grid-margin">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Remaining Balance<button type="button" class="btn btn-success">{{$balance->balance}} </button>
+                    <h4 class="card-title">Remaining Balance<button type="button" class="btn btn-success">{{$balance->balance ?? 0}} </button>
                   <br><button type="button" class="btn btn-success"> Add funds</button></h4> 
 
                  <form action="{{ route('payment.topup') }}" method="POST" class="topup-form">
@@ -54,17 +54,9 @@
                           </tr>
                         </thead>
                         <tbody> 
-                          <tr>
-                            <td> 12/8/2024</td>
-                            <td>$800</td>
-                            <td><div class="badge badge-outline-success">Success</div></td>
-                          </tr>
                           
-                          <tr>
-                            <td> 12/8/2024</td>
-                            <td>$1200</td>
-                            <td><div class="badge badge-outline-danger">Failed</div></td>
-                          </tr>
+                          
+                          
                           
                         </tbody>
                       </table>

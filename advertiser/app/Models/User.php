@@ -17,6 +17,8 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+    protected $table ="users";
     protected $fillable = [
         'name',
         'email',
@@ -29,7 +31,6 @@ class User extends Authenticatable
         
     ];
 
-    protected $table ="users";
 // credit relationship
     public function credit()
 {

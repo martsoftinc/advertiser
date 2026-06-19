@@ -59,10 +59,11 @@
             <input type="number" class="form-control"  name="daily_budget" required>
         </div>
 
+        <!--
         <div class="form-group">
             <label for="end_date">Cpc (minimum 0.01)</label>
             <input type="number" class="form-control" name="cpc" step="0.001" min="0" required>
-        </div>
+        </div> -->
 
         <div class="form-group">
         <label for="ad_group_id">Gender</label>
@@ -97,18 +98,32 @@
         
 
         
-
+<!-- 
        <div class="form-group">
     <label for="countries">Select Countries</label>
     <select class="form-control select2-multiple" id="countries" name="countries[]" multiple="multiple">
-        @foreach($countries as $country)
-            <option value="{{ $country->id }}">{{ $country->name }}</option>
+        @foreach(\App\Models\Country::all() as $country)
+                                     @if(in_array($country->code, ['NG', 'ZA', 'GH']))
+                                          <option value="{{ $country->code }}">{{ $country->name }}</option>
+                                      @endif
+        @endforeach
+    </select>
+</div> -->
+
+
+<div class="form-group">
+    <label for="countries">Select Countries</label>
+    <select class="form-control select2-multiple" id="countries" name="countries[]" multiple="multiple">
+        @foreach(\App\Models\Country::all() as $country)
+            {{-- Only show popular ones or remove the if condition completely --}}
+            @if(in_array($country->code, ['NG', 'ZA', 'GH', 'KE'])) 
+                <option value="{{ $country->id }}" {{ old('countries') && in_array($country->id, old('countries')) ? 'selected' : '' }}>
+                    {{ $country->name }} ({{ $country->code }})
+                </option>
+            @endif
         @endforeach
     </select>
 </div>
-
-
-
         
 
         <button type="submit" class="btn btn-primary">Create Campaign</button>

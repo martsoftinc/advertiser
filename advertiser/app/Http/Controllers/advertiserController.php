@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\campaignModel;
 use App\Models\AdgroupModel;
+use App\Models\Country;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -39,20 +40,16 @@ class advertiserController extends Controller
 
 
     public function index(){
-        return view('login');
-    }
-
-    public function test(){
         return view('welcome');
     }
 
+   
+
     public function login(){
-        return view('login');
+        return view('auth.login');
     }
 
-    public function register(){
-        return view('register');
-    }
+    
 
     /* start of advertiser login */
     public function loginrequest(Request $request) 
@@ -104,7 +101,7 @@ class advertiserController extends Controller
         'country' => 'required|string|max:255',
         'password' => 'required|string|min:8|confirmed',
         'countries' => 'required|array|min:1',
-        'countries.*' => 'exists:countries,id'
+        #'countries.*' => 'exists:countries,id'
     ]);
 
     if ($validator->fails()) {
@@ -116,12 +113,12 @@ class advertiserController extends Controller
     $user = User::create([
         'name' => $request->input('name'),
         'email' => $request->input('email'),
-        'gender' => $request->input('email'),
-        'search_terms' => $request->input('search_terms'),
-        'utm_source' => $request->input('utm_source'),
-        'utm_campaign' => $request->input('utm_campaign'),
-        'utm_medium' => $request->input('utm_meidum'),
-        'referrer' => $request->input('referrer'),
+        #'gender' => $request->input('email'),
+        #'search_terms' => $request->input('search_terms'),
+        #'utm_source' => $request->input('utm_source'),
+        #'utm_campaign' => $request->input('utm_campaign'),
+       # 'utm_medium' => $request->input('utm_meidum'),
+        #'referrer' => $request->input('referrer'),
         'country' => $request->input('country'),
         'role'=> $role,
         'password' => \Hash::make($request->input('password')),
@@ -186,10 +183,10 @@ class advertiserController extends Controller
     
     $status = strtolower($campaign->status);
     
-    if (in_array($status, ['approved', 'running'])) {
-        $campaign->status = 'paused'; // Or set to 'Stopped' if preferred
-    } elseif (in_array($status, ['paused', 'Under Review'])) {
-        $campaign->status = 'approved'; // Or 'Running'
+    if (in_array($status, ['Approved', 'running'])) {
+        $campaign->status = 'Paused'; // Or set to 'Stopped' if preferred
+    } elseif (in_array($status, ['Paused', 'Under Review'])) {
+        $campaign->status = 'Approved'; // Or 'Running'
     } else {
         return redirect()->back()->with('error', 'Cannot toggle this status.');
     }
@@ -215,8 +212,13 @@ class advertiserController extends Controller
                 abort(403, 'Unauthorized action.');
             }
 
+             $selectedCountries = DB::table('campaign_country')
+                ->where('campaign_id', $id)
+                ->pluck('country_id')
+                ->toArray();
+
             $adGroups = AdgroupModel::where('user_id', Auth::id())->get();
-            return view('campaign.edit',compact('edit','adGroups'));
+            return view('campaign.edit',compact('edit','adGroups','selectedCountries'));
         }
 
 
@@ -308,20 +310,20 @@ class advertiserController extends Controller
     }
 
     //Show list of ad groups
-    public function Adgroup()
-    {
-       // Get the authenticated user's ID
+   public function Adgroup()
+{
     $userId = Auth::id();
-   
-    // Fetch ad groups for the user with the count of associated campaigns
+    
+    // Fetch ad groups with campaign count
     $adgroup_list = AdgroupModel::where('user_id', $userId)
-        ->withCount(['campaigns' => function ($query) /*use ($userId) */ {
-           # $query->where('user_id', $userId);
-        }])
+        ->withCount('campaigns') // This will add campaigns_count
         ->get();
 
-        return view('campaign.adgroup',compact('adgroup_list'));
-    }
+    return view('campaign.adgroup', compact('adgroup_list'));
+}
+
+
+
 
 
     // show adgroup create page
@@ -379,9 +381,9 @@ class advertiserController extends Controller
         // Validate the form inputs
         $request->validate([
             'campaign_name' => 'required|string|max:255',
-            'utm_source' => 'string|max:255',
-            'utm_medium' => 'string|max:255',
-            'utm_campaign' => 'string|max:255',
+            //'utm_source' => 'string|max:255',
+            //'utm_medium' => 'string|max:255',
+            //'utm_campaign' => 'string|max:255',
             //'search_terms' => 'string|max:255',
             'landing_page' => 'required|url',
             'final_url' => 'required|url',
@@ -396,7 +398,8 @@ class advertiserController extends Controller
         
         
         // Create a new campaign record
-        $status = 'Under Review';
+        $status = 'Pending';
+        $cpc = "0.005";
         $campaign = new campaignModel([
             'campaign_name' => $request->input('campaign_name'),
             
@@ -410,7 +413,7 @@ class advertiserController extends Controller
             'status' => $status,
             'age_group' => $request->input('age_group'),
             'gender' => $request->input('gender'),
-            'cpc' => $request->input('cpc'),
+            'cpc' => $cpc,
             //'search_terms' => $request->input('search_terms'),
             //'referrer' => $request->input('referrer'),
             'adgroup_id' => $request->input('adgroup_id'),
@@ -440,7 +443,7 @@ class advertiserController extends Controller
         }
         DB::table('campaign_country')->insert($countryData);
         
-        return redirect()->back()->with('success', 'Campaign created successfully!');              
+        return redirect()->route('campaign.list')->with('success', 'Campaign created successfully.');          
     }
 
 
@@ -507,7 +510,7 @@ class advertiserController extends Controller
 
         if ($item) {
             $item->delete();
-            return redirect()->route('campaign-list')->with('success', 'Item deleted successfully.');
+            return redirect()->route('campaign.list')->with('success', 'Item deleted successfully.');
         }
 
         return redirect()->route('dashboard')->with('error', 'Item not found.');
@@ -591,6 +594,60 @@ public function getInitialsAttribute()
     }
 
 
+public function update(Request $request, $id)
+{
+    // Combine all validation rules in one place
+    $validated = $request->validate([
+        'campaign_name' => 'required|string|max:255',
+        'adgroup_id' => 'required|exists:adgroup', // Add exists validation
+        'landing_page' => 'required|url',
+        'final_url' => 'required|url',
+        'end_date' => 'required|date',
+        'gender' => 'required|in:all,male,female', // Specify allowed values
+        'daily_budget' => 'required|numeric|min:0',
+        'age_group' => 'required|string',
+        'countries' => 'required|array|min:1',
+        'countries.*' => 'exists:countries,id'
+    ]);
+
+    // Find the campaign
+    $campaign = campaignModel::findOrFail($id);
+    
+    // Update the campaign with validated data (excluding countries)
+    $campaign->update([
+        'campaign_name' => $validated['campaign_name'],
+        'adgroup_id' => $validated['adgroup_id'], // This will now work
+        'landing_page' => $validated['landing_page'],
+        'final_url' => $validated['final_url'],
+        'end_date' => $validated['end_date'],
+        'gender' => $validated['gender'],
+        'daily_budget' => $validated['daily_budget'],
+        'age_group' => $validated['age_group'],
+        'status' => 'pending',
+    ]);
+
+    // Update countries relationship
+    DB::table('campaign_country')
+        ->where('campaign_id', $campaign->id)
+        ->delete();
+
+    $countryData = [];
+    foreach ($validated['countries'] as $countryId) {
+        $countryData[] = [
+            'campaign_id' => $campaign->id,
+            'country_id' => $countryId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
+    
+    if (!empty($countryData)) {
+        DB::table('campaign_country')->insert($countryData);
+    }
+
+    return redirect()->route('campaign.list') // Redirect to index instead of back
+        ->with('success', 'Campaign updated successfully.');
+}
 
    
 }

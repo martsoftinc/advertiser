@@ -9,8 +9,8 @@ class Country extends Model
 {
     use HasFactory;
 
-    public function countries()
-{
-    return $this->belongsToMany(Country::class);
-}
+  public function campaigns()
+    {
+        return $this->belongsToMany(campaignModel::class);
+    }
 }

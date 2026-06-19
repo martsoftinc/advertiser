@@ -16,10 +16,8 @@ class campaignModel extends Model
         'final_url',
         'end_date',
         'gender',
-        'referrer',
         'daily_budget',
         'age_group',
-        'gender',
         'cpc',
         'user_id',
         'adgroup_id',
@@ -31,6 +29,8 @@ class campaignModel extends Model
     {
         return $this->belongsTo(AdgroupModel::class, 'adgroup_id','adgroup_id');
     }
+
+    
 
      public function user()
 {
@@ -59,6 +59,12 @@ class campaignModel extends Model
         } while (self::where('campaign_id', $campaignId)->exists());
 
         return $campaignId;
+    }
+
+    public function countries()
+    {
+        return $this->belongsToMany(Country::class,'campaign_country','campaign_id','country_id');
+        
     }
    
 }
